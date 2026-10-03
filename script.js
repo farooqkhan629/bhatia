@@ -22,6 +22,26 @@ document.querySelectorAll('[data-link]').forEach(el => {
 });
 
 /* =====================================================
+   FIT TO SCREEN: design ko phone ki width par scale karta hai
+   ===================================================== */
+const DESIGN_W = 860;   // design ki width. Kam karo (jaise 780) to phone par text thora bada hoga
+const stage = document.getElementById('stage');
+const card  = document.getElementById('card');
+
+function fit() {
+  const avail = document.documentElement.clientWidth - 20;
+  const s = Math.min(1, avail / DESIGN_W);
+  card.style.transform = 'scale(' + s + ')';
+  stage.style.width  = (DESIGN_W * s) + 'px';
+  stage.style.height = (card.offsetHeight * s) + 'px';
+}
+fit();
+window.addEventListener('resize', fit);
+window.addEventListener('orientationchange', fit);
+window.addEventListener('load', fit);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+
+/* =====================================================
    GLOBE: rotating gold world map + orbits + connections
    ===================================================== */
 const canvas = document.getElementById('globe');
@@ -52,9 +72,9 @@ const links = [[0, 1], [1, 2], [2, 0]];
 
 /* thin orbit rings */
 const orbits = [
-  { r: 215, tilt: 0.32, rot: -0.42, speed: 0.00050, off: 0,   dash: false },
-  { r: 238, tilt: 0.28, rot:  0.36, speed: -0.00035, off: 2,  dash: true  },
-  { r: 192, tilt: 0.45, rot:  0.05, speed: 0.00028, off: 4,   dash: false }
+  { r: 215, tilt: 0.32, rot: -0.42, speed: 0.00050, off: 0, dash: false },
+  { r: 238, tilt: 0.28, rot:  0.36, speed: -0.00035, off: 2, dash: true  },
+  { r: 192, tilt: 0.45, rot:  0.05, speed: 0.00028, off: 4, dash: false }
 ];
 
 const sparkles = [[-74,40],[2,48],[37,-1],[78,22],[116,-30],[-58,-14],[139,36],[32,31],[12,8],[100,14]];
