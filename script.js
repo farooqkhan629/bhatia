@@ -1,30 +1,34 @@
 /* =====================================================
-   LINKS: yahan apne links daalo. Khali ('') chhodo to
-   click par kuch nahi hoga. Click par naye tab mein khulenge.
+   LINKS: yahan apne links daalo (quotes ke andar).
+   Link daalne ke baad click par seedha wahi page naye tab
+   mein khulega. Khali ('') chhodo to click par kuch nahi hoga.
    ===================================================== */
 const LINKS = {
   webBog:        '',   // BOG website
   webAldo:       '',   // ALDO website
   mapUganda:     '',   // Uganda Google Maps link
   mapMadagascar: '',   // Madagascar Google Maps link
-  linkedin:      '',   // LinkedIn page
-  instagram:     '',   // Instagram page
-  facebook:      '',   // Facebook page
-  tiktok:        ''    // TikTok page
+  linkedin:      'https://www.linkedin.com/in/bathia-ocean-gold-international-277887438',   // LinkedIn page link
+  instagram:     'https://www.instagram.com/bathiaoceangold?',   // Instagram page link
+  facebook:      'https://www.facebook.com/share/19YTEJqdeT/?mibextid=wwXIfr',   // Facebook page link
+  tiktok:        'https://www.tiktok.com/@BOG3166'    // TikTok page link
 };
 
 document.querySelectorAll('[data-link]').forEach(el => {
-  el.addEventListener('click', e => {
-    e.preventDefault();
-    const url = LINKS[el.dataset.link];
-    if (url) window.open(url, '_blank', 'noopener');
-  });
+  const url = LINKS[el.dataset.link];
+  if (url) {
+    el.href = url;
+    el.target = '_blank';
+    el.rel = 'noopener noreferrer';
+  } else {
+    el.addEventListener('click', e => e.preventDefault());
+  }
 });
 
 /* =====================================================
    FIT TO SCREEN: design ko phone ki width par scale karta hai
    ===================================================== */
-const DESIGN_W = 860;   // design ki width. Kam karo (jaise 780) to phone par text thora bada hoga
+const DESIGN_W = 860;
 const stage = document.getElementById('stage');
 const card  = document.getElementById('card');
 
@@ -52,6 +56,10 @@ canvas.width = W * dpr;
 canvas.height = H * dpr;
 ctx.scale(dpr, dpr);
 
+const reduceMotion = window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ROTATION_SPEED = reduceMotion ? 0 : 0.014;   // rotation speed yahan se badlo
+
 const projection = d3.geoOrthographic().scale(R).translate([CX, CY]).clipAngle(90);
 const path = d3.geoPath(projection, ctx);
 const graticule = d3.geoGraticule10();
@@ -68,7 +76,7 @@ const places = [
   { name: 'MADAGASCAR', coord: [46.8, -19.5], dx: 16,  dy: 12,  align: 'left'  },
   { name: 'DUBAI',      coord: [55.3, 25.2],  dx: 16,  dy: -10, align: 'left'  }
 ];
-const links = [[0, 1], [1, 2], [2, 0]];
+const routes = [[0, 1], [1, 2], [2, 0]];
 
 /* thin orbit rings */
 const orbits = [
@@ -84,7 +92,8 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json')
   .then(r => r.json())
-  .then(world => { land = topojson.feature(world, world.objects.land); });
+  .then(world => { land = topojson.feature(world, world.objects.land); })
+  .catch(() => { /* internet na ho to globe bina land ke chalta rahega */ });
 
 /* ---------- helpers ---------- */
 function orbPt(o, th) {
@@ -144,8 +153,7 @@ function rr(x, y, w, h, r) {
 
 function arrowAt(pts, u, dir) {
   const n = pts.length - 1;
-  let i = Math.floor(u * n);
-  i = clamp(i, 0, n - 1);
+  const i = clamp(Math.floor(u * n), 0, n - 1);
   const a = pts[i], b = pts[i + 1];
   if (!a || !b) return;
   const x = a.x + (b.x - a.x) * (u * n - i);
@@ -168,7 +176,7 @@ function arrowAt(pts, u, dir) {
 }
 
 function drawConnections(t, center) {
-  links.forEach(([ia, ib], idx) => {
+  routes.forEach(([ia, ib], idx) => {
     const interp = d3.geoInterpolate(places[ia].coord, places[ib].coord);
     const N = 60, pts = [];
     for (let i = 0; i <= N; i++) {
@@ -262,7 +270,10 @@ function drawPlaces(t, center) {
 
 /* ---------- main loop ---------- */
 function draw(t) {
-  const lam = -45 + t * 0.014;                 // rotation speed: 0.014 badlo
+  /* tab chhupa ho to drawing skip (battery bachti hai) */
+  if (document.hidden) { requestAnimationFrame(draw); return; }
+
+  const lam = -45 + t * ROTATION_SPEED;
   projection.rotate([lam, -18, 0]);
   const center = [-lam, 18];
 
@@ -294,6 +305,7 @@ function draw(t) {
   sparkles.forEach(([lon, lat], i) => {
     if (d3.geoDistance([lon, lat], center) >= Math.PI / 2 - 0.05) return;
     const p = projection([lon, lat]);
+    if (!p) return;
     const tw = 0.5 + 0.5 * Math.sin(t / 400 + i * 1.7);
     const g = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], 8);
     g.addColorStop(0, `rgba(255,252,210,${tw})`);
