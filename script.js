@@ -1,21 +1,50 @@
 /* =====================================================
-   LINKS: yahan apne links daalo (quotes ke andar).
-   Link daalne ke baad click par seedha wahi page naye tab
-   mein khulega. Khali ('') chhodo to click par kuch nahi hoga.
+   LINKS: websites + maps (quotes ke andar link daalo)
+   Khali ('') chhodo to click par kuch nahi hoga.
    ===================================================== */
 const LINKS = {
-  webBog:        '',   // BOG website
-  webAldo:       '',   // ALDO website
+  webBog:        'https://bog-international.com/',   // BOG website
+  webAldo:       'https://aldopartnersmd.com/',   // ALDO website
   mapUganda:     '',   // Uganda Google Maps link
-  mapMadagascar: '',   // Madagascar Google Maps link
-  linkedin:      'https://www.linkedin.com/in/bathia-ocean-gold-international-277887438',   // LinkedIn page link
-  instagram:     'https://www.instagram.com/bathiaoceangold?',   // Instagram page link
-  facebook:      'https://www.facebook.com/share/19YTEJqdeT/?mibextid=wwXIfr',   // Facebook page link
-  tiktok:        'https://www.tiktok.com/@BOG3166'    // TikTok page link
+  mapMadagascar: ''    // Madagascar Google Maps link
 };
 
+/* =====================================================
+   SOCIAL: har platform ke liye BOG aur ALDO dono ke links
+   - dono bhare hon  -> popup aayega (BOG / ALDO chuno)
+   - sirf ek bhara   -> seedha wahi khulega
+   - dono khali      -> kuch nahi hoga
+   ===================================================== */
+const SOCIAL = {
+  linkedin: {
+    bog:  'https://www.linkedin.com/in/bathia-ocean-gold-international-277887438',
+    aldo: 'https://www.instagram.com/bathiaoceangold'   // ALDO LinkedIn link yahan daalo
+  },
+  instagram: {
+    bog:  'https://www.instagram.com/bathiaoceangold',
+    aldo: ''   // ALDO Instagram link yahan daalo
+  },
+  facebook: {
+    bog:  'https://www.facebook.com/share/19YTEJqdeT/?mibextid=wwXIfr',
+    aldo: ''   // ALDO Facebook link yahan daalo
+  },
+  tiktok: {
+    bog:  'https://www.tiktok.com/@BOG3166',
+    aldo: ''   // ALDO TikTok link yahan daalo
+  }
+};
+const SOCIAL_NAMES = {
+  linkedin: 'LinkedIn',
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  tiktok: 'TikTok'
+};
+
+/* ---------- normal links (websites + maps) ---------- */
 document.querySelectorAll('[data-link]').forEach(el => {
-  const url = LINKS[el.dataset.link];
+  const key = el.dataset.link;
+  if (SOCIAL[key]) return;                  // social neeche handle hota hai
+  const url = LINKS[key];
   if (url) {
     el.href = url;
     el.target = '_blank';
@@ -24,6 +53,50 @@ document.querySelectorAll('[data-link]').forEach(el => {
     el.addEventListener('click', e => e.preventDefault());
   }
 });
+
+/* ---------- social links: popup chooser ---------- */
+const chooser      = document.getElementById('chooser');
+const chooseBog    = document.getElementById('chooseBog');
+const chooseAldo   = document.getElementById('chooseAldo');
+const chooserTitle = document.getElementById('chooserTitle');
+const chooserClose = document.getElementById('chooserClose');
+
+function closeChooser() {
+  if (!chooser) return;
+  chooser.classList.remove('open');
+  chooser.setAttribute('aria-hidden', 'true');
+}
+
+document.querySelectorAll('[data-link]').forEach(el => {
+  const key = el.dataset.link;
+  if (!SOCIAL[key]) return;
+
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    const { bog, aldo } = SOCIAL[key];
+
+    if (!bog && !aldo) return;                                   // koi link nahi
+    if (bog && !aldo) { window.open(bog,  '_blank', 'noopener'); return; }
+    if (aldo && !bog) { window.open(aldo, '_blank', 'noopener'); return; }
+
+    /* dono links hain -> popup */
+    if (!chooser) { window.open(bog, '_blank', 'noopener'); return; }
+    chooserTitle.textContent = SOCIAL_NAMES[key];
+    chooseBog.href  = bog;
+    chooseAldo.href = aldo;
+    chooser.classList.add('open');
+    chooser.setAttribute('aria-hidden', 'false');
+  });
+});
+
+if (chooser) {
+  chooserClose.addEventListener('click', closeChooser);
+  chooser.addEventListener('click', e => { if (e.target === chooser) closeChooser(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeChooser(); });
+  [chooseBog, chooseAldo].forEach(a =>
+    a.addEventListener('click', () => setTimeout(closeChooser, 150))
+  );
+}
 
 /* =====================================================
    FIT TO SCREEN: design ko phone ki width par scale karta hai
@@ -51,10 +124,19 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 const canvas = document.getElementById('globe');
 const ctx = canvas.getContext('2d');
 const W = 620, H = 360, CX = W / 2, CY = H / 2, R = 140;
-const dpr = Math.min(window.devicePixelRatio || 1, 2);
-canvas.width = W * dpr;
-canvas.height = H * dpr;
-ctx.scale(dpr, dpr);
+
+/* sharp rendering: screen ke hisab se resolution, minimum 3x, maximum 4x */
+let Q = 3;
+function sizeCanvas() {
+  Q = Math.min(4, Math.max(3, Math.ceil((window.devicePixelRatio || 1) * 2)));
+  canvas.width  = Math.round(W * Q);
+  canvas.height = Math.round(H * Q);
+  ctx.setTransform(Q, 0, 0, Q, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+}
+sizeCanvas();
+window.addEventListener('resize', sizeCanvas);
 
 const reduceMotion = window.matchMedia &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -269,9 +351,9 @@ function drawPlaces(t, center) {
 }
 
 /* ---------- main loop ---------- */
-function draw(t) {
+function drawFrame(t) {
   /* tab chhupa ho to drawing skip (battery bachti hai) */
-  if (document.hidden) { requestAnimationFrame(draw); return; }
+  if (document.hidden) return;
 
   const lam = -45 + t * ROTATION_SPEED;
   projection.rotate([lam, -18, 0]);
@@ -334,7 +416,12 @@ function draw(t) {
 
   /* front half of orbits */
   drawOrbits(true, t);
+}
 
+/* ek frame ka error poore globe ko band nahi karega */
+function draw(t) {
+  try { drawFrame(t); }
+  catch (err) { console.error('Globe error:', err); }
   requestAnimationFrame(draw);
 }
 requestAnimationFrame(draw);

@@ -186,3 +186,37 @@ footer{position:relative;z-index:2;text-align:center;margin-top:14px}
 @media (prefers-reduced-motion: reduce){
   .pill::after,.btn::after,.banner::after,.globe-wrap::before{animation:none}
 }
+
+/* ---------- Social chooser popup ---------- */
+.chooser{
+  position:fixed;inset:0;z-index:999;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(6,38,27,.65);backdrop-filter:blur(4px);padding:20px;
+}
+.chooser.open{display:flex}
+.chooser-box{
+  position:relative;width:100%;max-width:360px;text-align:center;
+  background:radial-gradient(circle at 50% 0%,#fff,#fbf4de);
+  border:2px solid var(--gold);border-radius:20px;padding:26px 22px 22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  animation:pop .25s ease;
+}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.chooser-box h3{font-size:1.5rem;font-weight:800;color:#10241b;margin:2px 0 6px;letter-spacing:.04em}
+.chooser-sub{font-size:.65rem;letter-spacing:.2em;font-weight:700;color:var(--gold-d)}
+.chooser-close{
+  position:absolute;top:8px;right:12px;background:none;border:none;
+  font-size:1.8rem;line-height:1;color:var(--green);cursor:pointer;
+}
+.chooser-btn{
+  display:block;margin-top:12px;padding:13px 10px;text-decoration:none;
+  font-family:inherit;font-size:.78rem;font-weight:800;letter-spacing:.06em;
+  color:var(--gold-l);
+  background:linear-gradient(180deg,#1b6247,var(--green-m) 18%,var(--green-d));
+  border:2px solid var(--gold);border-radius:40px;
+  box-shadow:inset 0 0 0 2px #06261b,0 4px 10px rgba(0,0,0,.28);
+  transition:transform .2s,box-shadow .2s;
+}
+.chooser-btn:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 2px #06261b,0 0 16px rgba(212,160,23,.75)}
+.chooser-btn.hide{display:none}
+#globe{image-rendering:auto;transform:translateZ(0)}
