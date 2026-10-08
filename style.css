@@ -23,13 +23,12 @@ body{
   position:absolute;top:0;left:0;
   width:860px;
   transform-origin:top left;
-  background:
-    radial-gradient(circle at 50% 36%,#ffffff 0%,#fcf9f0 48%,#f3ead2 100%);
+  background:radial-gradient(circle at 50% 36%,#ffffff 0%,#fcf9f0 48%,#f3ead2 100%);
   border-radius:20px;padding:32px 30px 22px;overflow:hidden;
   border:2px solid var(--gold);
   box-shadow:0 24px 70px rgba(60,40,0,.28),inset 0 0 0 1px rgba(255,255,255,.8);
 }
-/* clean thin inner frame (straight border, no arcs) */
+/* thin straight inner frame (no arcs) */
 .card::before{
   content:"";position:absolute;inset:7px;border-radius:14px;
   border:1px solid rgba(212,160,23,.4);
@@ -51,15 +50,37 @@ body{
 .side-text.right .line{margin-inline:auto}
 
 .brand{display:flex;flex-direction:column;align-items:center;text-align:center}
+
+/* ---------- LOGOS ----------
+   Dono ka box same hai. Size badalna ho to sirf neeche ki 2 values badlo:
+   BOG  : 1.08  (bara lage to 1.02, chhota lage to 1.14)
+   ALDO : 1.00  (bara lage to 0.94, chhota lage to 1.06)  */
 .logo-box{width:210px;height:200px;display:flex;align-items:center;justify-content:center}
-.logo-box img{width:100%;height:100%;object-fit:contain;transform:scale(1.08);filter:drop-shadow(0 8px 12px rgba(80,55,0,.28))}
+.logo-box img{
+  width:100%;height:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 8px 12px rgba(80,55,0,.28));
+}
+.logo-box img[src*="bog"]{transform:scale(1.08)}
+.logo-box img[src*="aldo"]{transform:scale(0.96)}
+
 .brand h2{
   height:2.4em;display:flex;align-items:center;justify-content:center;
   font-size:.95rem;font-weight:800;line-height:1.2;margin:6px 0 12px;color:#101c16;letter-spacing:.03em;
 }
-.divider{height:290px;width:2px;margin:0 auto;background:linear-gradient(transparent,var(--gold),transparent);position:relative}
+
+/* beech ki line: solid gold, hamesha dikhegi */
+.divider{
+  position:relative;
+  width:2px;min-width:2px;height:290px;margin:0 auto;
+  overflow:visible;
+}
+.divider::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,rgba(212,160,23,0) 0%,#d4a017 20%,#d4a017 80%,rgba(212,160,23,0) 100%);
+}
 .divider .dot{
-  position:absolute;top:40%;left:-5px;width:12px;height:12px;
+  position:absolute;top:40%;left:-5px;width:12px;height:12px;z-index:2;
   background:radial-gradient(circle at 35% 35%,#fff3b0,var(--gold-d));
   transform:rotate(45deg);
   box-shadow:0 0 10px rgba(212,160,23,.9);
@@ -113,7 +134,7 @@ body{
   animation:pulse 4s ease-in-out infinite;
 }
 @keyframes pulse{50%{transform:scale(1.12);opacity:.7}}
-#globe{position:relative;width:620px;height:360px}
+#globe{position:relative;width:620px;height:360px;image-rendering:auto;transform:translateZ(0)}
 
 /* ---------- TAGLINES ---------- */
 .tagline{
@@ -137,8 +158,7 @@ body{
 .name{
   position:relative;z-index:2;text-align:center;font-size:3rem;font-weight:800;letter-spacing:.03em;margin-top:12px;
   background:linear-gradient(180deg,#0c0c0c 0%,#0b3b2a 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 2px 2px rgba(120,90,0,.2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
 }
 .chairman{
   position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:16px;
@@ -182,16 +202,11 @@ footer{position:relative;z-index:2;text-align:center;margin-top:14px}
 .f1 span{width:64px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 .f2{font-size:.62rem;letter-spacing:.16em;margin-top:5px;font-weight:600;color:#2a3a32}
 
-/* ---------- Accessibility: reduce motion ---------- */
-@media (prefers-reduced-motion: reduce){
-  .pill::after,.btn::after,.banner::after,.globe-wrap::before{animation:none}
-}
-
 /* ---------- Social chooser popup ---------- */
 .chooser{
   position:fixed;inset:0;z-index:999;
   display:none;align-items:center;justify-content:center;
-  background:rgba(6,38,27,.65);backdrop-filter:blur(4px);padding:20px;
+  background:rgba(6,38,27,.65);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding:20px;
 }
 .chooser.open{display:flex}
 .chooser-box{
@@ -218,5 +233,10 @@ footer{position:relative;z-index:2;text-align:center;margin-top:14px}
   transition:transform .2s,box-shadow .2s;
 }
 .chooser-btn:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 2px #06261b,0 0 16px rgba(212,160,23,.75)}
-.chooser-btn.hide{display:none}
-#globe{image-rendering:auto;transform:translateZ(0)}
+.chooser-btn.off{opacity:.45;cursor:not-allowed;pointer-events:none;filter:grayscale(.4)}
+.chooser-btn.off::after{content:" (COMING SOON)";font-size:.6rem;letter-spacing:.1em}
+
+/* ---------- Accessibility: reduce motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  .pill::after,.btn::after,.banner::after,.globe-wrap::before{animation:none}
+}
