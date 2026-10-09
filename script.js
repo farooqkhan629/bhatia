@@ -5,8 +5,8 @@
 const LINKS = {
   webBog:        'https://bog-international.com/',   // BOG website
   webAldo:       'https://aldopartnersmd.com/',   // ALDO website
-  mapUganda:     '',   // Uganda Google Maps link
-  mapMadagascar: ''    // Madagascar Google Maps link
+  mapUganda:     'https://www.google.com/maps/search/?api=1&query=Plot+26+Uringi+Crescent+Kiwafu+Central+Entebbe+Uganda',   // Uganda Google Maps link
+  mapMadagascar: 'https://www.google.com/maps/search/?api=1&query=Lot+5+Cit%C3%A9+Lagrave+Pile+13%2F75+Tanambao+V+Tamatave+Toamasina+Madagascar' ,   // Madagascar Google Maps link
 };
 
 /* =====================================================
